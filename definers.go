@@ -14,16 +14,16 @@ type Problem struct {
 	dPeriod   float32
 	socket    []float32 //how many sockets each machine has
 	cycleTime []float32
-	chgOver   []float32   //changeover duration per product
-	mpMatch   [][]int     //list of machines that each product can be produced in
-	curDemand [][]float32 //demand of each item in each period
-	cumDemand [][]float32 //total demand of each item up to each period
+	chgOver   []float32 //changeover duration per product
+	mpMatch   [][]int   //list of machines that each product can be produced in
+	curDemand [][]int   //demand of each item in each period
+	cumDemand [][]int   //total demand of each item up to each period
 }
 type Chromosome struct {
 	machineLayer  [][]int
 	lotsizeLayer  [][]int
-	curProduction [][]float32
-	cumProduction [][]float32
+	curProduction [][]int
+	cumProduction [][]int
 	last          [][]int
 	mInvInd       [][][]int //inverse index for machines; shows at which [product][period] couples the machine is used in. Always keep sorted by period
 	mpInvInd      [][][]int
@@ -67,19 +67,19 @@ func (prob *Problem) readInit() {
 		}
 	}
 	curDemand := reflect.ValueOf(result["curDemand"])
-	prob.curDemand = make([][]float32, curDemand.Len())
+	prob.curDemand = make([][]int, curDemand.Len())
 	for i := 0; i < curDemand.Len(); i++ {
-		prob.curDemand[i] = make([]float32, reflect.ValueOf(curDemand.Index(i).Interface()).Len())
+		prob.curDemand[i] = make([]int, reflect.ValueOf(curDemand.Index(i).Interface()).Len())
 		for j := 0; j < len(prob.curDemand[i]); j++ {
-			prob.curDemand[i][j] = float32(reflect.ValueOf(curDemand.Index(i).Interface()).Index(j).Interface().(float64))
+			prob.curDemand[i][j] = int(reflect.ValueOf(curDemand.Index(i).Interface()).Index(j).Interface().(float64))
 		}
 	}
 	cumDemand := reflect.ValueOf(result["cumDemand"])
-	prob.cumDemand = make([][]float32, cumDemand.Len())
+	prob.cumDemand = make([][]int, cumDemand.Len())
 	for i := 0; i < cumDemand.Len(); i++ {
-		prob.cumDemand[i] = make([]float32, reflect.ValueOf(cumDemand.Index(i).Interface()).Len())
+		prob.cumDemand[i] = make([]int, reflect.ValueOf(cumDemand.Index(i).Interface()).Len())
 		for j := 0; j < len(prob.cumDemand[i]); j++ {
-			prob.cumDemand[i][j] = float32(reflect.ValueOf(cumDemand.Index(i).Interface()).Index(j).Interface().(float64))
+			prob.cumDemand[i][j] = int(reflect.ValueOf(cumDemand.Index(i).Interface()).Index(j).Interface().(float64))
 		}
 	}
 }
