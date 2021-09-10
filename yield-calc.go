@@ -2,19 +2,19 @@ package main
 
 func (ch *Chromosome) yieldAll(p Problem) []float32 {
 	cost := []float32{0.0, 0.0, 0.0}
-	curProduction := make([][]int, p.nPeriod)
-	cumProduction := make([][]int, p.nPeriod)
-	for period := 0; period < p.nPeriod; period++ {
-		curProduction[period] = make([]int, p.nProduct)
-		cumProduction[period] = make([]int, p.nProduct)
+	curProduction := make([][]int, p.nProduct)
+	cumProduction := make([][]int, p.nProduct)
+	for product := 0; product < p.nProduct; product++ {
+		curProduction[product] = make([]int, p.nPeriod)
+		cumProduction[product] = make([]int, p.nPeriod)
 	}
 	for product := 0; product < p.nProduct; product++ {
-		curProduction[0][product] = ch.lotsizeLayer[product][0]
-		cumProduction[0][product] = ch.lotsizeLayer[product][0]
-		if curProduction[0][product] <= p.curDemand[0][product] {
-			cost[0] += float32(p.curDemand[0][product]) - float32(curProduction[0][product])
+		curProduction[product][0] = ch.lotsizeLayer[product][0]
+		cumProduction[product][0] = ch.lotsizeLayer[product][0]
+		if curProduction[product][0] <= p.curDemand[product][0] {
+			cost[0] += float32(p.curDemand[product][0]) - float32(curProduction[product][0])
 		} else {
-			cost[1] += float32(curProduction[0][product]) - float32(p.curDemand[0][product])
+			cost[1] += float32(curProduction[product][0]) - float32(p.curDemand[product][0])
 		}
 
 	}
@@ -23,14 +23,14 @@ func (ch *Chromosome) yieldAll(p Problem) []float32 {
 			cost[2] += p.chgOver[val]
 		}
 	}
-	for period := 0; period < p.nPeriod; period++ {
+	for period := 1; period < p.nPeriod; period++ {
 		for product := 0; product < p.nProduct; product++ {
-			curProduction[period][product] = ch.lotsizeLayer[product][period]
-			cumProduction[period][product] = curProduction[period][product] + cumProduction[period-1][product]
-			if cumProduction[period][product] <= p.cumDemand[period][product] {
-				cost[0] += float32(p.cumDemand[period][product]) - float32(cumProduction[period][product])
+			curProduction[product][period] = ch.lotsizeLayer[product][period]
+			cumProduction[product][period] = curProduction[product][period] + cumProduction[product][period-1]
+			if cumProduction[product][period] <= p.cumDemand[product][period] {
+				cost[0] += float32(p.cumDemand[product][period]) - float32(cumProduction[product][period])
 			} else {
-				cost[1] += float32(curProduction[period][product]) - float32(p.curDemand[period][product])
+				cost[1] += float32(cumProduction[product][period]) - float32(p.cumDemand[product][period])
 			}
 		}
 		for machine := 0; machine < p.nMachine; machine++ {
@@ -50,3 +50,4 @@ func (ch *Chromosome) yieldAll(p Problem) []float32 {
 /*func (ch *Chromosome) yieldChange(changedIndices[][][]int,newMac[][]int,newLS[][]int) []float32{
 	return
 }*/
+//calculate difference in yield and objective by giving only the changed indices; in order to increase performance

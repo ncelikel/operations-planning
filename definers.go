@@ -13,26 +13,27 @@ type Problem struct {
 	nPeriod   int
 	dPeriod   float32
 	socket    []float32 //how many sockets each machine has
-	cycleTime []float32
+	cycleTime []float32 //cycle time of products
 	chgOver   []float32 //changeover duration per product
 	mpMatch   [][]int   //list of machines that each product can be produced in
 	curDemand [][]int   //demand of each item in each period
 	cumDemand [][]int   //total demand of each item up to each period
 }
+
 type Chromosome struct {
-	machineLayer  [][]int
-	lotsizeLayer  [][]int
-	curProduction [][]int
-	cumProduction [][]int
-	last          [][]int
+	machineLayer  [][]int //machineLayer[product][period]=machine -> indicates that the product will be produced on period on machine. If -1; product is not produced on that period on any machine
+	lotsizeLayer  [][]int //lotsizeLayer[product][period]=lotsize -> how many units to be produced
+	curProduction [][]int //total production on that [product][period]
+	cumProduction [][]int //cumulative production of product up to that period
+	last          [][]int //last[machine][period] = product; which product's mold will be kept on machine at the end of period
 	mInvInd       [][][]int //inverse index for machines; shows at which [product][period] couples the machine is used in. Always keep sorted by period
-	mpInvInd      [][][]int
-	availability  [][]float32
-	utilization   [][]float32
-	objective     float32
+	mpInvInd      [][][]int //inverse index for [machine][period]; which gives the list of products produced on that machine in that period
+	availability  [][]float32 //availability[machine][period]; total time remaining for production after subtracting required changeovers.
+	utilization   [][]float32 //utilization[machine][period]; what percentage of the total time will be efficient.
+	objective     float32 //sum of all costs; deficit, inventory and changeover
 }
 
-func (prob *Problem) readInit() {
+func (prob *Problem) readInit() { //read problem description from local .json file
 	data, err := ioutil.ReadFile("initializer.json")
 	if err != nil {
 		fmt.Println(err)
