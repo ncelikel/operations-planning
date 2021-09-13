@@ -1,6 +1,7 @@
 package main
 
 import (
+	//"fmt"
 	"math/rand"
 	"sort"
 )
@@ -44,7 +45,7 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 	}
 
 	var availableDuration float32
-	var u float32
+	u:=float32(0.9)
 	var keepFlag bool
 	var mpList []int
 	for mach := 0; mach < p.nMachine; mach++ {
@@ -74,7 +75,7 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 		amt = append(amt, float64(1.0))
 		amt = append([]float64{0.0}, amt...)
 		for prodInd := 1; prodInd < len(mpList)+1; prodInd++ {
-			ch.lotsizeLayer[mpList[prodInd-1]][0] = int(float32((amt[prodInd] - amt[prodInd-1])) * u * availableDuration * p.socket[mach] / p.cycleTime[mpList[prodInd-1]])
+			ch.lotsizeLayer[mpList[prodInd-1]][0] = int(float32((amt[prodInd] - amt[prodInd-1])) * u * availableDuration * p.socket[mpList[prodInd-1]] / p.cycleTime[mpList[prodInd-1]])
 		}
 
 		for period := 1; period < p.nPeriod; period++ {
@@ -124,9 +125,10 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 			amt = append(amt, float64(1.0))
 			amt = append([]float64{0.0}, amt...)
 			for prodInd := 1; prodInd < len(mpList)+1; prodInd++ {
-				ch.lotsizeLayer[mpList[prodInd-1]][period] = int(float32((amt[prodInd] - amt[prodInd-1])) * u * availableDuration * p.socket[mach] / p.cycleTime[mpList[prodInd-1]])
+				ch.lotsizeLayer[mpList[prodInd-1]][period] = int(float32((amt[prodInd] - amt[prodInd-1])) * u * availableDuration * p.socket[mpList[prodInd-1]] / p.cycleTime[mpList[prodInd-1]])
 			}
 		}
 	}
+
 	return ch
 }
