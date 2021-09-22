@@ -15,7 +15,7 @@ func main() {
 	chromosome_2 := prob.randInit(0.2, 0.85)
 	_ = chromosome_2.yieldAll(prob)
 
-	children:=chromosome_1.blockCrossover(0.3,prob,chromosome_2)
+	children:=chromosome_1.blockCrossover(0.3,prob,chromosome_2,0.5)
 	_=children[0].yieldAll(prob)
 	_=children[1].yieldAll(prob)
 

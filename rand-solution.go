@@ -2,6 +2,7 @@ package main
 
 import (
 	//"fmt"
+	"fmt"
 	"math/rand"
 	"sort"
 )
@@ -45,16 +46,18 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 	}
 
 	var availableDuration float32
-	u:=float32(0.9)
+	u:=util
 	var keepFlag bool
 	var mpList []int
+	var amt []float64
 	for mach := 0; mach < p.nMachine; mach++ {
 		if len(ch.mpInvInd[mach][0]) != 0 { //choose random last product in period 0
 			ch.last[mach][0] = ch.mpInvInd[mach][0][rand.Intn(len(ch.mpInvInd[mach][0]))]
 		}
-		amt := make([]float64, 0)
+		amt = make([]float64, 0)
 		availableDuration = p.dPeriod
-		mpList = ch.mpInvInd[mach][0]
+		mpList = make([]int,len(ch.mpInvInd[mach][0]))
+		copy(mpList, ch.mpInvInd[mach][0])
 		for prodInd := 0; prodInd < len(mpList); prodInd++ { //subtract changeover durations to find net available time
 			availableDuration -= p.chgOver[mpList[prodInd]]
 		}
@@ -83,15 +86,17 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 				ch.last[mach][period] = ch.mpInvInd[mach][period][rand.Intn(len(ch.mpInvInd[mach][period]))]
 			}
 			amt := make([]float64, 0)
-			availableDuration = p.dPeriod
+			availableDuration = p.dPeriod*u
 			keepFlag = false
-			mpList = ch.mpInvInd[mach][period]
+			mpList = make([]int, len(ch.mpInvInd[mach][period]))
+			copy(mpList , ch.mpInvInd[mach][period])
+			var tmp int
 			for prodInd := 0; prodInd < len(mpList); prodInd++ {
 				if mpList[prodInd] != ch.last[mach][period-1] {
 					availableDuration -= p.chgOver[mpList[prodInd]]
 				} else {
 					if period != 1 {
-						if ch.last[mach][period-2] == mpList[prodInd] { //if the mold is kept in the previous period as well (from t-2 to t-1), then there must be only the kept product on t-1 on that machine. Otherwise can't keep the same mold again
+						if ch.last[mach][period-2] == mpList[prodInd] || (ch.last[mach][period-2] == -1 && ch.last[mach][period-1] ==-1) { //if the mold is kept in the previous period as well (from t-2 to t-1), then there must be only the kept product on t-1 on that machine. Otherwise can't keep the same mold again
 							if len(mpList) == 1 {
 								keepFlag = true
 							} else {
@@ -117,7 +122,6 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 				ch.last[mach][period-1] = -1 //if the product mold kept in previous period is not used, then don't keep
 			}
 			ch.utilization[mach][period] = util
-			ch.availability[mach][period] = availableDuration
 			for prodInd := 1; prodInd < len(mpList); prodInd++ {
 				amt = append(amt, rand.Float64())
 			}
@@ -125,7 +129,13 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 			amt = append(amt, float64(1.0))
 			amt = append([]float64{0.0}, amt...)
 			for prodInd := 1; prodInd < len(mpList)+1; prodInd++ {
-				ch.lotsizeLayer[mpList[prodInd-1]][period] = int(float32((amt[prodInd] - amt[prodInd-1])) * u * availableDuration * p.socket[mpList[prodInd-1]] / p.cycleTime[mpList[prodInd-1]])
+				ch.lotsizeLayer[mpList[prodInd-1]][period] = int(float32((amt[prodInd] - amt[prodInd-1])) * availableDuration * p.socket[mpList[prodInd-1]] / p.cycleTime[mpList[prodInd-1]])
+			}
+			tmp=0
+			fmt.Println(mpList)
+			for prodInd := 1; prodInd < len(mpList)+1; prodInd++ {
+				tmp+=ch.lotsizeLayer[mpList[prodInd-1]][period]*int(p.cycleTime[mpList[prodInd-1]])/int(p.socket[mpList[prodInd-1]])
+				fmt.Println(p.cycleTime[mpList[prodInd-1]])
 			}
 		}
 	}
