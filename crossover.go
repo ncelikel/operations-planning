@@ -150,8 +150,8 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 	}
 	var keepFlag bool
 	var availableDuration float32
-	mpList := make([]int, 0)
-	alternatives := make([]int, 0)
+	var mpList []int
+	var alternatives []int
 	var durationRatio float32
 	var amt int
 	for mac, _ := range affectedMac { //restructure the last layer. if still compatible, keep. if not, choose another last for the mp. if unable to do so, -1
@@ -170,7 +170,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 					child_1.last[mac][t] = -1
 				} //if nothing produced on mp, last layer is -1
 			}
-			availableDuration = p.dPeriod
+			availableDuration = p.dPeriod * child_1.utilization[mac][t]
 			keepFlag = false
 			mpList=make([]int, len(child_1.mpInvInd[mac][t]))
 			copy(mpList, child_1.mpInvInd[mac][t])
@@ -217,7 +217,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 					for prodInd := 0; prodInd < len(mpList); prodInd++ {
 						durationRatio += (float32(child_1.lotsizeLayer[mpList[prodInd]][t]) * float32(p.cycleTime[mpList[prodInd]]) / float32(p.socket[mpList[prodInd]]))
 					}
-					durationRatio = availableDuration * child_1.utilization[mac][t] / durationRatio //durationRatio is the available duration change in the mp
+					durationRatio = availableDuration / durationRatio //durationRatio is the available duration change in the mp
 					for prodInd := 0; prodInd < len(mpList); prodInd++ {
 						amt = child_1.lotsizeLayer[mpList[prodInd]][t]
 						amt = int(float32(amt) * durationRatio)
@@ -228,7 +228,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 					for _, prod := range prev_1[mac][t] {
 						durationRatio += (float32(child_1.lotsizeLayer[prod][t]) * float32(p.cycleTime[prod]) / float32(p.socket[prod]))
 					}
-					durationRatio = availableDuration * child_1.utilization[mac][t] * lsConservation / durationRatio //durationRatio is the available duration change in the mp
+					durationRatio = availableDuration * lsConservation / durationRatio //durationRatio is the available duration change in the mp
 					for _, prod := range prev_1[mac][t] {
 						amt = child_1.lotsizeLayer[prod][t]
 						amt = int(float32(amt) * durationRatio)
@@ -238,7 +238,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 					for _, prod := range pnew_1[mac][t] {
 						durationRatio += (float32(child_1.lotsizeLayer[prod][t]) * float32(p.cycleTime[prod]) / float32(p.socket[prod]))
 					}
-					durationRatio = availableDuration * child_1.utilization[mac][t] * (1.0 - lsConservation) / durationRatio //durationRatio is the available duration change in the mp
+					durationRatio = availableDuration * (1.0 - lsConservation) / durationRatio //durationRatio is the available duration change in the mp
 					for _, prod := range pnew_1[mac][t] {
 						amt = child_1.lotsizeLayer[prod][t]
 						amt = int(float32(amt) * durationRatio)
@@ -249,7 +249,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 			}
 		}
 	}
-	for mac, _ := range affectedMac { //restructure the last layer. if still compatible, keep. if not, choose another last for the mp. if unable to do so, -1
+	for mac := range affectedMac { //restructure the last layer. if still compatible, keep. if not, choose another last for the mp. if unable to do so, -1
 		for t := minAP; t <= maxAP; t++ { //adjust the lot size layer too, in order to fit max usable time in each mp
 			//do the same for second child
 			durationRatio = 0.0
@@ -265,7 +265,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 					child_2.last[mac][t] = -1
 				} //if nothing produced on mp, last layer is -1
 			}
-			availableDuration = p.dPeriod
+			availableDuration = p.dPeriod * child_2.utilization[mac][t]
 			keepFlag = false
 			mpList=make([]int, len(child_2.mpInvInd[mac][t]))
 			copy(mpList, child_2.mpInvInd[mac][t])
@@ -322,7 +322,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 					for _, prod := range prev_2[mac][t] {
 						durationRatio += (float32(child_2.lotsizeLayer[prod][t]) * float32(p.cycleTime[prod]) / float32(p.socket[prod]))
 					}
-					durationRatio = availableDuration * child_2.utilization[mac][t] * lsConservation / durationRatio //durationRatio is the available duration change in the mp
+					durationRatio = availableDuration * lsConservation / durationRatio //durationRatio is the available duration change in the mp
 					for _, prod := range prev_2[mac][t] {
 						amt = child_2.lotsizeLayer[prod][t]
 						amt = int(float32(amt) * durationRatio)
@@ -332,7 +332,7 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 					for _, prod := range pnew_2[mac][t] {
 						durationRatio += (float32(child_2.lotsizeLayer[prod][t]) * float32(p.cycleTime[prod]) / float32(p.socket[prod]))
 					}
-					durationRatio = availableDuration * child_2.utilization[mac][t] * (1.0 - lsConservation) / durationRatio //durationRatio is the available duration change in the mp
+					durationRatio = availableDuration * (1.0 - lsConservation) / durationRatio //durationRatio is the available duration change in the mp
 					for _, prod := range pnew_2[mac][t] {
 						amt = child_2.lotsizeLayer[prod][t]
 						amt = int(float32(amt) * durationRatio)

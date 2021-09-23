@@ -55,7 +55,7 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 			ch.last[mach][0] = ch.mpInvInd[mach][0][rand.Intn(len(ch.mpInvInd[mach][0]))]
 		}
 		amt = make([]float64, 0)
-		availableDuration = p.dPeriod
+		availableDuration = p.dPeriod*util
 		mpList = make([]int,len(ch.mpInvInd[mach][0]))
 		copy(mpList, ch.mpInvInd[mach][0])
 		for prodInd := 0; prodInd < len(mpList); prodInd++ { //subtract changeover durations to find net available time
@@ -78,7 +78,7 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 		amt = append(amt, float64(1.0))
 		amt = append([]float64{0.0}, amt...)
 		for prodInd := 1; prodInd < len(mpList)+1; prodInd++ {
-			ch.lotsizeLayer[mpList[prodInd-1]][0] = int(float32((amt[prodInd] - amt[prodInd-1])) * u * availableDuration * p.socket[mpList[prodInd-1]] / p.cycleTime[mpList[prodInd-1]])
+			ch.lotsizeLayer[mpList[prodInd-1]][0] = int(float32((amt[prodInd] - amt[prodInd-1])) * availableDuration * p.socket[mpList[prodInd-1]] / p.cycleTime[mpList[prodInd-1]])
 		}
 
 		for period := 1; period < p.nPeriod; period++ {
