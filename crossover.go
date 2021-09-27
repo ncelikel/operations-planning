@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -70,7 +69,6 @@ func (ch *Chromosome) blockCrossover(sizeCoeff float32, p Problem, c2 Chromosome
 	var child_2 Chromosome
 	child_1.copyChromosome(*ch)
 	child_2.copyChromosome(c2)
-	fmt.Println(blockIndices)
 	prev_1 := make([][][]int, p.nMachine)
 	pnew_1 := make([][][]int, p.nMachine)
 	prev_2 := make([][][]int, p.nMachine)

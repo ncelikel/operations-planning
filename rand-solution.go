@@ -1,8 +1,6 @@
 package main
 
 import (
-	//"fmt"
-	"fmt"
 	"math/rand"
 	"sort"
 )
@@ -90,7 +88,6 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 			keepFlag = false
 			mpList = make([]int, len(ch.mpInvInd[mach][period]))
 			copy(mpList , ch.mpInvInd[mach][period])
-			var tmp int
 			for prodInd := 0; prodInd < len(mpList); prodInd++ {
 				if mpList[prodInd] != ch.last[mach][period-1] {
 					availableDuration -= p.chgOver[mpList[prodInd]]
@@ -130,12 +127,6 @@ func (p *Problem) randInit(freq float32, util float32) Chromosome { //create a r
 			amt = append([]float64{0.0}, amt...)
 			for prodInd := 1; prodInd < len(mpList)+1; prodInd++ {
 				ch.lotsizeLayer[mpList[prodInd-1]][period] = int(float32((amt[prodInd] - amt[prodInd-1])) * availableDuration * p.socket[mpList[prodInd-1]] / p.cycleTime[mpList[prodInd-1]])
-			}
-			tmp=0
-			fmt.Println(mpList)
-			for prodInd := 1; prodInd < len(mpList)+1; prodInd++ {
-				tmp+=ch.lotsizeLayer[mpList[prodInd-1]][period]*int(p.cycleTime[mpList[prodInd-1]])/int(p.socket[mpList[prodInd-1]])
-				fmt.Println(p.cycleTime[mpList[prodInd-1]])
 			}
 		}
 	}

@@ -156,9 +156,9 @@ func (ch *Chromosome) machineMutation(sizeCoeff float32, p Problem, fillProb flo
 			if rand.Float32() < fillProb {
 				imac = p.mpMatch[iprod][rand.Intn(len(p.mpMatch[iprod]))]
 				mutated.mpInvInd[imac][iper] = append(mutated.mpInvInd[imac][iper], iprod)
-				mutated.machineLayer[imac][iper] = iprod
-				mutated.lotsizeLayer[imac][iper] = int(mutated.availability[imac][iper]*(1.0/float32(len(mutated.mpInvInd[imac][iper])))*(0.5+rand.Float32())) / int(p.cycleTime[iprod])
-				mutated.lotsizeLayer[imac][iper] = mutated.lotsizeLayer[imac][iper] * int(p.socket[iprod])
+				mutated.machineLayer[iprod][iper] = imac
+				mutated.lotsizeLayer[iprod][iper] = int(mutated.availability[imac][iper]*(1.0/float32(len(mutated.mpInvInd[imac][iper])))*(0.5+rand.Float32())) / int(p.cycleTime[iprod])
+				mutated.lotsizeLayer[iprod][iper] = mutated.lotsizeLayer[iprod][iper] * int(p.socket[iprod])
 
 				// assigned a randomized lot size to the newly added machineLayer entry. Now it needs repair to fit the available duration
 
@@ -209,7 +209,7 @@ func (ch *Chromosome) machineMutation(sizeCoeff float32, p Problem, fillProb flo
 					}
 					mutated.mpInvInd[imac][iper] = make([]int, len(tmp))
 					copy(mutated.mpInvInd[imac][iper], tmp)
-					for v := rand.Intn(len(p.mpMatch[iprod])); p.mpMatch[iprod][v] != imac; v = rand.Intn(len(p.mpMatch[iprod])) {
+					for v := rand.Intn(len(p.mpMatch[iprod])); p.mpMatch[iprod][v] == imac; v = rand.Intn(len(p.mpMatch[iprod])) {
 						newMac = p.mpMatch[iprod][v]
 					}
 					mutated.mpInvInd[newMac][iper] = append(mutated.mpInvInd[newMac][iper],iprod)
@@ -281,8 +281,8 @@ func (ch *Chromosome) machineMutation(sizeCoeff float32, p Problem, fillProb flo
 				}
 				mutated.mpInvInd[imac][iper] = make([]int, len(tmp))
 				copy(mutated.mpInvInd[imac][iper], tmp)
-				mutated.machineLayer[imac][iper]=-1
-				mutated.lotsizeLayer[imac][iper]=0
+				mutated.machineLayer[iprod][iper]=-1
+				mutated.lotsizeLayer[iprod][iper]=0
 				if(len(mutated.mpInvInd[imac][iper])!=0){ //fit the previous period lot sizes to available duration
 					availableDuration = p.dPeriod * mutated.utilization[imac][iper]
 					for _, prod := range mutated.mpInvInd[imac][iper] {
