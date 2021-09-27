@@ -88,3 +88,8 @@ func main() {
 
 	writeChromosome(parent_pool[parent_ranking_pool[0]],"best_chromosome")
 }
+
+func iterate(parent_pool []Chromosome,parent_objective_pool []float32,parent_ranking_pool []int,
+	prob Problem,PARENT_POOL_SIZE int,MATING_POOL_SIZE int,LOTSIZE_CONSERVATION float32,MUTATION_PROB float32) {
+
+}
