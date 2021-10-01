@@ -33,6 +33,14 @@ type Chromosome struct {
 	objective     float32 //sum of all costs; deficit, inventory and changeover
 }
 
+type Island struct{
+	parent_pool []Chromosome
+	parent_objective_pool []float32
+	parent_ranking_pool []int
+	stop_meter float32
+	iteration_continue bool
+}
+
 func (prob *Problem) readInit() { //read problem description from local .json file
 	data, err := ioutil.ReadFile("initializer.json")
 	if err != nil {

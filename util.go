@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"math/rand"
 )
 
 func (ch *Chromosome) copyChromosome(c2 Chromosome) {
@@ -99,4 +101,66 @@ func mean(arr []float32) float32{
 		total+=v
 	}
 	return(total/float32(len(arr)))
+}
+
+
+
+
+func (isl *Island) iterate(n int,prob Problem,waiting_convergence bool,PARENT_POOL_SIZE int,MATING_POOL_SIZE int,LOTSIZE_CONSERVATION float32,MUTATION_PROB float64,SIZE_COEFF float32) {
+		var prevBest float32
+		var newBest float32
+		mutation_rand:=0.0
+		
+		for iter:=0;iter<n;iter++{
+			prevBest=isl.parent_objective_pool[isl.parent_ranking_pool[0]]
+			mating_pool:=[]Chromosome{}
+			mating_objective_pool:=[]float32{}
+			for mating:=0;mating<MATING_POOL_SIZE/2;mating++{
+				children:=isl.parent_pool[isl.parent_ranking_pool[mating]].blockCrossover(SIZE_COEFF,prob,isl.parent_pool[rand.Intn(PARENT_POOL_SIZE)],LOTSIZE_CONSERVATION)
+				
+				mating_pool=append(mating_pool, Chromosome{})
+				mating_pool[len(mating_pool)-1].copyChromosome(children[0])
+				mating_pool[len(mating_pool)-1].yieldAll(prob)
+				mating_objective_pool=append(mating_objective_pool, mating_pool[len(mating_pool)-1].objective)
+	
+				mating_pool=append(mating_pool, Chromosome{})
+				mating_pool[len(mating_pool)-1].copyChromosome(children[1])
+				mating_pool[len(mating_pool)-1].yieldAll(prob)
+				mating_objective_pool=append(mating_objective_pool, mating_pool[len(mating_pool)-1].objective)		
+			}
+			for i:=0;i<len(mating_pool);i++ {
+				if(rand.Float64()<MUTATION_PROB){
+					mutation_rand=rand.Float64()
+					if(mutation_rand<0.2){
+						mating_pool=append(mating_pool, mating_pool[i].utilMutation(0.08,prob))
+					} else if (mutation_rand<0.7){
+						mating_pool=append(mating_pool, mating_pool[i].lotsizeMutation(0.10,prob))
+					} else {
+						mating_pool=append(mating_pool, mating_pool[i].machineMutation(0.10,prob,0.25,6))
+					}
+					mating_pool[len(mating_pool)-1].yieldAll(prob)
+					mating_objective_pool = append(mating_objective_pool, mating_pool[len(mating_pool)-1].objective)
+				}
+			}
+			for i,child:=range mating_pool{
+				if(mating_objective_pool[i]<isl.parent_objective_pool[isl.parent_ranking_pool[len(isl.parent_ranking_pool)-1]]){
+					isl.parent_pool[isl.parent_ranking_pool[len(isl.parent_ranking_pool)-1]]=Chromosome{}
+					isl.parent_pool[isl.parent_ranking_pool[len(isl.parent_ranking_pool)-1]].copyChromosome(child)
+					isl.parent_objective_pool[isl.parent_ranking_pool[len(isl.parent_ranking_pool)-1]]=child.objective
+					insertSorted(isl.parent_ranking_pool,isl.parent_objective_pool)
+				}			
+			}
+			newBest=isl.parent_objective_pool[isl.parent_ranking_pool[0]]
+			if(prevBest*0.98<=newBest){
+				isl.stop_meter+=0.05
+			} else {isl.stop_meter-=0.03}
+			if(isl.stop_meter>1.0 && !waiting_convergence){
+				isl.stop_meter=0.0
+				isl.iteration_continue=false
+			}
+			fmt.Println("best:",isl.parent_objective_pool[isl.parent_ranking_pool[0]])
+			fmt.Println("mean:",mean(isl.parent_objective_pool))
+			fmt.Println("worst:",isl.parent_objective_pool[isl.parent_ranking_pool[PARENT_POOL_SIZE-1]])
+			fmt.Println()
+		}
 }
